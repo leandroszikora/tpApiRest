@@ -4,9 +4,19 @@ const bodyParser = require('body-parser');
 const { checkSchema, validationResult } = require('express-validator/check');
 
 const Curso = require("../models/Curso");
+const Cliente = require("../models/Cliente");
+
 var path = require('path');
 
-router.use(bodyParser.urlencoded({ extended: true}));
+router.use(bodyParser.json());
+
+router.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE");
+    res.header("Access-Control-Allow-Credentials", "true");
+    next();
+});
 
 router.get('/', function(req, res){
     let criterio = {};
@@ -53,24 +63,23 @@ router.get('/:id/alumnos', function (req, res) {
 });
 
 router.post('/', checkSchema({
-    anioCurso: {
+    anioDictado: {
         in: ['body'],
         errorMessage: 'El campo anioCurso debe ser un numero valido',
         isInt: true
     },
-    duracionCurso: {
+    duracion: {
         in: ['body'],
         errorMessage: 'El campo duracionCurso debe ser de tipo String',
         isString: true
     },
-    temaCurso: {
+    tema: {
         in: ['body'],
         errorMessage: 'El campo temaCurso debe ser de tipo String',
         isString:true
     }
 
 }), function (req, res) {
-
     let validation = validationResult(req).array();
 
     if (validation.length > 0) {
@@ -78,10 +87,12 @@ router.post('/', checkSchema({
         return;
     }
 
+
     var nuevoCurso = new Curso({
-        anioDictado: req.body.anioCurso,
-        duracion: req.body.duracionCurso,
-        tema: req.body.temaCurso
+        anioDictado: req.body.anioDictado,
+        duracion: req.body.duracion,
+        tema: req.body.tema,
+        imagen: req.body.imagen
     });
 
     nuevoCurso.save().then(doc => {
